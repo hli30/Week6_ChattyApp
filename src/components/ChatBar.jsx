@@ -8,9 +8,10 @@ export default class Chatbar extends Component {
       currentUser: props.username,
       content: ''
     }
-    this.handleDetectEnter = this.handleDetectEnter.bind(this);
     this.handleUsernameChange = this.handleUsernameChange.bind(this);
     this.handleContentChange = this.handleContentChange.bind(this);
+    this.handleContentChangeEnter = this.handleContentChangeEnter.bind(this);
+    this.handleUsernameChangeEnter = this.handleUsernameChangeEnter.bind(this);
   }
 
   handleUsernameChange(e) {
@@ -21,11 +22,18 @@ export default class Chatbar extends Component {
     this.setState({content: e.target.value});
   }
 
-  handleDetectEnter(e) {
+  handleContentChangeEnter(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      this.props.onEnter(this.state.currentUser, this.state.content);
+      this.props.onContentEnter(this.state.currentUser, this.state.content);
       this.setState({content: ''});
+    }
+  }
+
+  handleUsernameChangeEnter(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      this.props.onNameEnter(this.state.currentUser);
     }
   }
 
@@ -33,8 +41,8 @@ export default class Chatbar extends Component {
     console.log('Rendering <Chatbar/>');
     return (
       <footer className="chatbar">
-        <input className="chatbar-username" placeholder="Your Name (Optional)" value={this.state.currentUser} onChange={this.handleUsernameChange}/>
-        <input className="chatbar-message" placeholder="Type a message and hit ENTER" value={this.state.content} onChange={this.handleContentChange} onKeyUp={this.handleDetectEnter}/>
+        <input className="chatbar-username" placeholder="Your Name (Optional)" value={this.state.currentUser} onChange={this.handleUsernameChange} onKeyUp={this.handleUsernameChangeEnter}/>
+        <input className="chatbar-message" placeholder="Type a message and hit ENTER" value={this.state.content} onChange={this.handleContentChange} onKeyUp={this.handleContentChangeEnter}/>
       </footer>
     );
   }
@@ -42,7 +50,8 @@ export default class Chatbar extends Component {
 
 Chatbar.propTypes = {
   username: PropTypes.string,
-  onEnter: PropTypes.func
+  onContentEnter: PropTypes.func,
+  onNameEnter: PropTypes.func
 }
 
 

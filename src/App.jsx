@@ -7,29 +7,59 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      currentUser: {name: ''}, // optional. if currentUser is not defined, it means the user is Anonymous
+      currentUser: {name: 'Anonymous'},
       messages: []
     }
     this.socket = '';
-    this.onEnter = this.onEnter.bind(this);
+    this.onContentEnter = this.onContentEnter.bind(this);
+    this.onNameEnter = this.onNameEnter.bind(this);
   }
 
   componentDidMount() {
     this.socket = new WebSocket('ws:localhost:3001');
 
     this.socket.onmessage = (e) => {
-      const msgs = this.state.messages.concat(JSON.parse(e.data));
-      this.setState({messages: msgs})
+      const incMsg = JSON.parse(e.data);
+
+      switch (incMsg.type) {
+        case 'incomingMessage':
+          this.setState({messages: this.state.messages.concat(incMsg)});
+          break;
+        case 'incomingNotification':
+          this.setState({
+            messages: this.state.messages.concat(incMsg)
+          });
+          break;
+        case 'connectedUsers':
+          console.log('users', incMsg.count);
+          break;
+        default:
+          throw new Error('Unknown event type' + incMsg.type);
+      }
     }
   }
 
-  onEnter (username, content) {
+  onContentEnter (username, content) {
     if (!username.trim()) {
       username = 'Anonymous';
     }
-    const newMsg = {username, content};
+
+    this.onNameEnter(username);
+    const newMsg = {type: 'postMessage', username, content};
 
     this.socket.send(JSON.stringify(newMsg));
+  }
+
+  onNameEnter (username) {
+    if (username !== this.state.currentUser.name) {
+      const notification = {
+        type: 'postNotification', 
+        oldName: this.state.currentUser.name, 
+        newName: username
+      }
+      this.setState({currentUser:{name: username}});
+      this.socket.send(JSON.stringify(notification))
+    }
   }
 
   render() {
@@ -40,7 +70,8 @@ class App extends Component {
         <MessageList messages={this.state.messages}/>
         <Chatbar 
           username={this.state.currentUser.name}
-          onEnter={this.onEnter}
+          onContentEnter={this.onContentEnter}
+          onNameEnter={this.onNameEnter}
           />
       </div>
     );

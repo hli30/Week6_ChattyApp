@@ -20,16 +20,46 @@ const wss = new SocketServer({ server });
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
-  ws.on('message', function incoming(msg) {
-    let incMsg = JSON.parse(msg);
-    incMsg.id = uuidv4();
-    let outMsg = JSON.stringify(incMsg);
+  const userCount = {
+    type: 'connectedUsers', 
+    count: wss.clients.size
+  }
+
+  wss.broadcast = function broadcast(data) {
     wss.clients.forEach(function each(client) {
       if (client.readyState === ws.OPEN) {
-        client.send(outMsg);
+        client.send(data);
       }
     });
+  };
+
+  ws.on('message', function incoming(msg) {
+    const outMsg = filterAndRepackMsg(msg);
+    wss.broadcast(outMsg);
   });
+
+  wss.broadcast(JSON.stringify(userCount));
+
   // Set up a callback for when a client closes the socket. This usually means they closed their browser.
-  ws.on('close', () => console.log('Client disconnected'));
+  ws.on('close', () => {
+    console.log('Client disconnected');
+    wss.broadcast(JSON.stringify(userCount));
+  })
 });
+
+const filterAndRepackMsg = (msg) => {
+  const incMsg = JSON.parse(msg);
+  incMsg.id = uuidv4();
+
+  switch (incMsg.type) {
+    case 'postMessage':
+      incMsg.type = 'incomingMessage';
+      return JSON.stringify(incMsg);
+    case 'postNotification':
+      incMsg.type = 'incomingNotification';
+      incMsg.content = `${incMsg.oldName} changed their name to ${incMsg.newName}`;
+      return JSON.stringify(incMsg);
+    default:
+      throw new Error('Unknown event type' + msg.type);
+  }
+}

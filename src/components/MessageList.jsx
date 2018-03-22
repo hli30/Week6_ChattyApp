@@ -10,6 +10,7 @@ export default class MessageList extends Component {
         key={msg.id} 
         content={msg.content} 
         username={msg.username}
+        type={msg.type}
       />));
     return (
       <main className="messages">
