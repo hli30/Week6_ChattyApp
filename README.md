@@ -4,7 +4,7 @@ A real time chatroom web application demonstrating the use of React and WebSocke
 
 ## Screenshots
 
-[main_screen]()
+!['main_screen'](https://github.com/hli30/Week6_ChattyApp/blob/master/docs/chatty_app_screen.png)
 
 ## Dependencies
 
