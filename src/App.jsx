@@ -8,7 +8,8 @@ class App extends Component {
     super(props);
     this.state = {
       currentUser: {name: 'Anonymous'},
-      messages: []
+      messages: [],
+      onlineUserCount: ''
     }
     this.socket = '';
     this.onContentEnter = this.onContentEnter.bind(this);
@@ -31,7 +32,7 @@ class App extends Component {
           });
           break;
         case 'connectedUsers':
-          console.log('users', incMsg.count);
+          this.setState({onlineUserCount: incMsg.count})
           break;
         default:
           throw new Error('Unknown event type' + incMsg.type);
@@ -66,7 +67,7 @@ class App extends Component {
     console.log('Rendering <App/>');
     return (
       <div>
-        <NavBar/>
+        <NavBar onlineUserCount={this.state.onlineUserCount.toString()}/>
         <MessageList messages={this.state.messages}/>
         <Chatbar 
           username={this.state.currentUser.name}
