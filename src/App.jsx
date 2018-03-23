@@ -22,6 +22,7 @@ class App extends Component {
     this.socket.onmessage = (e) => {
       const incMsg = JSON.parse(e.data);
 
+      //Distinguishing the type of incoming message and process accordingly
       switch (incMsg.type) {
         case 'incomingMessage':
           this.setState({messages: this.state.messages.concat(incMsg)});
@@ -40,6 +41,7 @@ class App extends Component {
     }
   }
 
+  //Called when enter pressed in the message box
   onContentEnter (username, content) {
     if (!username.trim()) {
       username = 'Anonymous';
@@ -51,6 +53,7 @@ class App extends Component {
     this.socket.send(JSON.stringify(newMsg));
   }
 
+  //Called when enter pressed in the name box
   onNameEnter (username) {
     if (username !== this.state.currentUser.name) {
       const notification = {
